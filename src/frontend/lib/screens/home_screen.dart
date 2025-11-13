@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/media_service.dart';
 import 'package:frontend/widgets/custom_video_widget.dart';
-import 'package:frontend/widgets/info_section.dart';
+import 'package:frontend/weather_clock_display/presentation/info_section.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
