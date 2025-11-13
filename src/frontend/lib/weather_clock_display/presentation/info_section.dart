@@ -10,6 +10,14 @@ import 'weather_widget.dart';
 /// - 구성: 시간 (269px) | 구분선 (71px × 1px) | 날씨
 /// - 구분선: #6B6B6B, 세로 실선
 class InfoSection extends StatelessWidget {
+  static const double clockAreaWidth = 269;
+  static const double weatherAreaWidth = 220;
+  static const double dividerWidth = 1;
+  static const double gap = 35;
+  static const double baseHeight = 90;
+  static const double baseWidth =
+      clockAreaWidth + weatherAreaWidth + (gap * 2) + dividerWidth;
+
   final String? cityName;
   final Color? textColor;
   final Color? dividerColor;
@@ -28,31 +36,34 @@ class InfoSection extends StatelessWidget {
     final primaryColor = textColor ?? const Color(0xFF6B6B6B);
     final divColor = dividerColor ?? const Color(0xFF6B6B6B);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 269,
-          height: 90,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: ClockWidget(
-              width: 269,
-              height: 90,
-              textColor: primaryColor,
-              fontSize: 72,
-              amPmFontSize: 36,
-              verticalOffset: -6,
+    return SizedBox(
+      width: baseWidth,
+      height: baseHeight,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: clockAreaWidth,
+            height: baseHeight,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: ClockWidget(
+                width: clockAreaWidth,
+                height: baseHeight,
+                textColor: primaryColor,
+                fontSize: 72,
+                amPmFontSize: 36,
+                verticalOffset: -6,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 35),
-        Container(width: 1, height: 90, color: divColor),
-        const SizedBox(width: 35),
-        Flexible(
-          child: SizedBox(
-            height: 90,
+          const SizedBox(width: gap),
+          Container(width: dividerWidth, height: baseHeight, color: divColor),
+          const SizedBox(width: gap),
+          SizedBox(
+            width: weatherAreaWidth,
+            height: baseHeight,
             child: Align(
               alignment: Alignment.centerLeft,
               child: Transform.translate(
@@ -66,15 +77,15 @@ class InfoSection extends StatelessWidget {
                   unitFontSize: 65,
                   conditionFontSize: 18,
                   showCondition: false,
-                  height: 90,
+                  height: baseHeight,
                   textVerticalOffset: -6,
-                iconVerticalOffset: -4,
+                  iconVerticalOffset: -4,
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -99,80 +110,31 @@ class ResponsiveInfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isMobile = constraints.maxWidth < mobileBreakpoint;
-
-        if (isMobile) {
-          // 모바일: 컴팩트 가로 레이아웃
-          return _buildCompactHorizontalLayout();
-        }
-
-        // 데스크톱: 기본 가로 레이아웃
-        return InfoSection(
+        final infoSection = InfoSection(
           cityName: cityName,
           textColor: textColor,
           showWeatherLoading: true,
         );
-      },
-    );
-  }
 
-  Widget _buildCompactHorizontalLayout() {
-    final primaryColor = textColor ?? const Color(0xFF6B6B6B);
+        final shouldScale = constraints.maxWidth < mobileBreakpoint ||
+            constraints.maxWidth < InfoSection.baseWidth;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Flexible(
-          flex: 5,
-          child: SizedBox(
-            height: 56,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: ClockWidget(
-                width: 200,
-                textColor: primaryColor,
-                fontSize: 32,
-                amPmFontSize: 20,
-                height: 56,
-                verticalOffset: -4,
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 20),
-
-        Container(width: 1, height: 64, color: primaryColor),
-
-        const SizedBox(width: 20),
-
-        Flexible(
-          flex: 6,
-          child: SizedBox(
-            height: 64,
-            child: Align(
+        if (shouldScale) {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Transform.translate(
-                offset: const Offset(-35, 0),
-                child: WeatherWidget(
-                  cityName: cityName,
-                  textColor: primaryColor,
-                  showLoading: true,
-                  iconSize: 36,
-                  temperatureFontSize: 36,
-                  unitFontSize: 20,
-                  conditionFontSize: 14,
-                  showCondition: false,
-                  height: 64,
-                  textVerticalOffset: -4,
-                iconVerticalOffset: -3,
-                ),
-              ),
+              child: infoSection,
             ),
-          ),
-        ),
-      ],
+          );
+        }
+
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: infoSection,
+        );
+      },
     );
   }
 }
