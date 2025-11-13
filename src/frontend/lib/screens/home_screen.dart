@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/media_service.dart';
-import 'package:frontend/services/volume_service.dart';
 import 'package:frontend/widgets/custom_video_widget.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -240,16 +239,28 @@ class _HeroSpotlight extends StatefulWidget {
 }
 
 class _HeroSpotlightState extends State<_HeroSpotlight> {
-  int _volume = 15;
-  bool _muted = false;
-  bool _loading = false;
   bool _openingMedia = false;
   String? _mediaSessionId;
+  bool _autoLaunched = false;
 
   final MediaService _mediaService = mediaService;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_autoLaunched) {
+        _autoLaunched = true;
+        _launchNativePlayback(auto: true);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final double videoWidth = MediaQuery.of(context).size.width;
+    final double videoHeight = videoWidth / (16 / 9);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 30),
       decoration: BoxDecoration(
@@ -268,50 +279,10 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
         children: [
           Expanded(
             flex: 6,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: CustomVideoWidget(
-                        videoUrl: widget.videoUrl,
-                        autoplay: true,
-                        looping: true,
-                        volume: 0.0,
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.centerRight,
-                            end: Alignment.centerLeft,
-                            colors: [
-                              Colors.black.withOpacity(0.55),
-                              Colors.black.withOpacity(0.25),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 20,
-                      left: 24,
-                      right: 24,
-                      child: _VolumeControllerBar(
-                        volume: _volume,
-                        muted: _muted,
-                        loading: _loading,
-                        onVolumeChange: _changeVolume,
-                        onToggleMute: _toggleMute,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            child: CustomVideoWidget(
+              width: videoWidth,
+              height: videoHeight,
+              onPlay: _openingMedia ? null : _launchNativePlayback,
             ),
           ),
           const SizedBox(width: 30),
@@ -356,7 +327,8 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               FilledButton(
-                                onPressed: _openingMedia ? null : _launchNativePlayback,
+                                onPressed:
+                                    _openingMedia ? null : () => _launchNativePlayback(),
                                 style: FilledButton.styleFrom(
                                   backgroundColor: const Color(0xFFE53935),
                                   foregroundColor: Colors.white,
@@ -405,46 +377,13 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
     );
   }
 
-  Future<void> _changeVolume(bool increase) async {
-    setState(() => _loading = true);
-    final bool success = increase
-        ? await volumeService.volumeUp()
-        : await volumeService.volumeDown();
-    if (!mounted) {
-      return;
-    }
-    if (success) {
-      setState(() {
-        _muted = false;
-        _volume = (increase ? _volume + 1 : _volume - 1).clamp(0, 100).toInt();
-      });
-    } else {
-      _showMessage('볼륨을 변경하지 못했어요.');
-    }
-    setState(() => _loading = false);
-  }
-
-  Future<void> _toggleMute() async {
-    setState(() => _loading = true);
-    final bool success = await volumeService.setMuted(!_muted);
-    if (!mounted) {
-      return;
-    }
-    if (success) {
-      setState(() => _muted = !_muted);
-    } else {
-      _showMessage('음소거 상태를 변경하지 못했어요.');
-    }
-    setState(() => _loading = false);
-  }
-
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
   }
 
-  Future<void> _launchNativePlayback() async {
+  Future<void> _launchNativePlayback({bool auto = false}) async {
     if (_openingMedia) {
       return;
     }
@@ -455,17 +394,19 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
         return;
       }
       if (sessionId == null) {
-        _showMessage('영상 재생을 시작하지 못했어요.');
+        if (!auto) {
+          _showMessage('영상 재생을 시작하지 못했어요.');
+        }
       } else {
         _mediaSessionId = sessionId;
         await _mediaService.play(sessionId);
-        if (mounted) {
+        if (mounted && !auto) {
           _showMessage('TV에서 영상 재생을 시작했어요.');
         }
       }
     } catch (error) {
       debugPrint('[media] open/play error: $error');
-      if (mounted) {
+      if (mounted && !auto) {
         _showMessage('영상 재생 중 오류가 발생했어요.');
       }
     } finally {
@@ -482,89 +423,6 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
       _mediaSessionId = null;
     }
     super.dispose();
-  }
-}
-
-class _VolumeControllerBar extends StatelessWidget {
-  const _VolumeControllerBar({
-    required this.volume,
-    required this.muted,
-    required this.loading,
-    required this.onVolumeChange,
-    required this.onToggleMute,
-  });
-
-  final int volume;
-  final bool muted;
-  final bool loading;
-  final Future<void> Function(bool increase) onVolumeChange;
-  final Future<void> Function() onToggleMute;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.45),
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _circleButton(
-              icon: Icons.remove_rounded,
-              onTap: loading ? null : () => onVolumeChange(false),
-            ),
-            const SizedBox(width: 12),
-            _circleButton(
-              icon: muted ? Icons.volume_off_rounded : Icons.volume_mute_rounded,
-              onTap: loading ? null : onToggleMute,
-            ),
-            const SizedBox(width: 12),
-            _circleButton(
-              icon: Icons.add_rounded,
-              onTap: loading ? null : () => onVolumeChange(true),
-            ),
-            const SizedBox(width: 18),
-            Text(
-              muted ? '음소거됨' : '볼륨 $volume',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            if (loading) ...[
-              const SizedBox(width: 12),
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _circleButton({required IconData icon, VoidCallback? onTap}) {
-    return InkWell(
-      onTap: onTap,
-      customBorder: const CircleBorder(),
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withOpacity(onTap == null ? 0.25 : 0.4),
-        ),
-        child: Icon(icon, size: 20, color: Colors.white),
-      ),
-    );
   }
 }
 
