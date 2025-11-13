@@ -67,7 +67,7 @@ class InfoSection extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Transform.translate(
-                offset: const Offset(-35, 0),
+                offset: const Offset(-8, 0),
                 child: WeatherWidget(
                   cityName: cityName,
                   textColor: primaryColor,
