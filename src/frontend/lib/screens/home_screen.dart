@@ -282,7 +282,8 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
             child: CustomVideoWidget(
               width: videoWidth,
               height: videoHeight,
-              onPlay: _openingMedia ? null : _launchNativePlayback,
+              onPlay: null,
+              caption: _openingMedia ? '재생 준비 중...' : 'TV에서 자동 재생 중...',
             ),
           ),
           const SizedBox(width: 30),
@@ -325,35 +326,9 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
-                            children: [
-                              FilledButton(
-                                onPressed:
-                                    _openingMedia ? null : () => _launchNativePlayback(),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(0xFFE53935),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(22),
-                                  ),
-                                  textStyle: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                child: _openingMedia
-                                    ? const SizedBox(
-                                        height: 18,
-                                        width: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                        ),
-                                      )
-                                    : const Text('지금 보러가기'),
-                              ),
-                              const SizedBox(height: 22),
-                              const Wrap(
+                            children: const [
+                              SizedBox(height: 22),
+                              Wrap(
                                 spacing: 14,
                                 runSpacing: 12,
                                 children: [

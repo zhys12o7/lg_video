@@ -7,12 +7,14 @@ class CustomVideoWidget extends StatelessWidget {
     this.onPlay,
     this.width,
     this.height,
+    this.caption,
   });
 
   final ImageProvider? thumbnail;
   final VoidCallback? onPlay;
   final double? width;
   final double? height;
+  final String? caption;
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +60,31 @@ class CustomVideoWidget extends StatelessWidget {
               ),
             ),
             Center(
-              child: FilledButton.tonalIcon(
-                onPressed: onPlay,
-                icon: const Icon(Icons.play_arrow_rounded),
-                label: const Text('재생'),
-              ),
+              child: onPlay != null
+                  ? FilledButton.tonalIcon(
+                      onPressed: onPlay,
+                      icon: const Icon(Icons.play_arrow_rounded),
+                      label: const Text('재생'),
+                    )
+                  : DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.45),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          caption ?? 'TV에서 자동 재생 중...',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
             ),
           ],
         ),
