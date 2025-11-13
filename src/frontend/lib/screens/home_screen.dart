@@ -15,9 +15,7 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 30),
           child: Column(
             children: [
-              const ResponsiveInfoSection(
-                cityName: 'Seoul',
-              ),
+              const _TopHeader(),
               const SizedBox(height: 32),
               Expanded(
                 child: Column(
@@ -50,6 +48,30 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TopHeader extends StatelessWidget {
+  const _TopHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: const [
+        Expanded(
+          flex: 4,
+          child: ResponsiveInfoSection(cityName: 'Seoul'),
+        ),
+        SizedBox(width: 32),
+        Expanded(
+          flex: 5,
+          child: _SearchField(),
+        ),
+        SizedBox(width: 32),
+        _ProfileSummary(),
+      ],
     );
   }
 }
@@ -515,6 +537,111 @@ class _DockIcon extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField();
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      height: 58,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(32),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: TextField(
+          readOnly: true,
+          decoration: InputDecoration(
+            hintText: '무엇을 도와드릴까요?',
+            hintStyle: TextStyle(
+              color: colors.onSurfaceVariant,
+              fontSize: 16,
+            ),
+            border: InputBorder.none,
+            prefixIcon: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 18),
+              child: Icon(Icons.search_rounded, size: 26),
+            ),
+            suffixIcon: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.mic_none_rounded, size: 26),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileSummary extends StatelessWidget {
+  const _ProfileSummary();
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+
+    return Container(
+      width: 220,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: colors.surfaceVariant,
+            child: Icon(
+              Icons.person_outline_rounded,
+              color: colors.onSurfaceVariant,
+              size: 26,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Text(
+                '홍길동',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
+              SizedBox(height: 6),
+              Text(
+                '다른 계정으로 전환하기',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF7B7F8E),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
