@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/media_service.dart';
 import 'package:frontend/widgets/custom_video_widget.dart';
+import 'package:frontend/widgets/info_section.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -14,7 +15,9 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 30),
           child: Column(
             children: [
-              const _TopStatusBar(),
+              const ResponsiveInfoSection(
+                cityName: 'Seoul',
+              ),
               const SizedBox(height: 32),
               Expanded(
                 child: Column(
@@ -46,184 +49,6 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _TopStatusBar extends StatelessWidget {
-  const _TopStatusBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: const [
-        _TimeAndWeather(),
-        SizedBox(width: 36),
-        Expanded(child: _SearchField()),
-        SizedBox(width: 36),
-        _ProfileSummary(),
-      ],
-    );
-  }
-}
-
-class _TimeAndWeather extends StatelessWidget {
-  const _TimeAndWeather();
-
-  String _formatTime(DateTime time) {
-    final int hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
-    final String minute = time.minute.toString().padLeft(2, '0');
-    return '${hour.toString().padLeft(2, '0')}:$minute';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle timeStyle = Theme.of(context).textTheme.displaySmall ??
-        const TextStyle(fontSize: 40, fontWeight: FontWeight.w700);
-
-    return SizedBox(
-      width: 240,
-      child: StreamBuilder<DateTime>(
-        stream: Stream<DateTime>.periodic(
-          const Duration(seconds: 1),
-          (_) => DateTime.now(),
-        ),
-        builder: (context, snapshot) {
-          final DateTime now = snapshot.data ?? DateTime.now();
-          final String period = now.hour >= 12 ? 'PM' : 'AM';
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    _formatTime(now),
-                    style: timeStyle.copyWith(
-                      fontSize: 38,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF222328),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(
-                      period,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF5D606A),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: const [
-                  Icon(Icons.wb_sunny_rounded, color: Color(0xFFF5A623)),
-                  SizedBox(width: 6),
-                  Text(
-                    '17°C',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF3C3F47),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _SearchField extends StatelessWidget {
-  const _SearchField();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 52,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(26),
-        child: TextField(
-          readOnly: true,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            hintText: '무엇을 도와드릴까요?',
-            hintStyle: const TextStyle(color: Color(0xFF9AA0AF)),
-            prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF9AA0AF)),
-            suffixIcon: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.mic_none_rounded, color: Color(0xFF9AA0AF)),
-            ),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileSummary extends StatelessWidget {
-  const _ProfileSummary();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 196,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 22,
-            backgroundColor: Color(0xFFD8DAE5),
-            child: Icon(Icons.person_outline_rounded, color: Color(0xFF626678)),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                '홍길동',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: Color(0xFF232533),
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                '다른 계정으로 전환하기',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF7B7F8E),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
