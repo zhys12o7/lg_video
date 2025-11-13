@@ -265,85 +265,95 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
             flex: 6,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(28),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: CustomVideoWidget(
-                      videoUrl: widget.videoUrl,
-                      autoplay: true,
-                      looping: true,
-                      volume: 0.0,
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: CustomVideoWidget(
+                        videoUrl: widget.videoUrl,
+                        autoplay: true,
+                        looping: true,
+                        volume: 0.0,
+                      ),
                     ),
-                  ),
-                  Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerRight,
-                          end: Alignment.centerLeft,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.55),
-                            Colors.black.withValues(alpha: 0.2),
-                            Colors.transparent,
-                          ],
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.centerRight,
+                            end: Alignment.centerLeft,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.55),
+                              Colors.black.withValues(alpha: 0.25),
+                              Colors.transparent,
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 20,
-                    left: 24,
-                    child: _VolumeControllerBar(
-                      volume: _volume,
-                      muted: _muted,
-                      loading: _loading,
-                      onVolumeChange: _changeVolume,
-                      onToggleMute: _toggleMute,
+                    Positioned(
+                      bottom: 20,
+                      left: 24,
+                      right: 24,
+                      child: _VolumeControllerBar(
+                        volume: _volume,
+                        muted: _muted,
+                        loading: _loading,
+                        onVolumeChange: _changeVolume,
+                        onToggleMute: _toggleMute,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
           const SizedBox(width: 30),
           Expanded(
             flex: 5,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text(
-                  'THE GENTLEMEN',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF181A21),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Text(
+                    'THE GENTLEMEN',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF181A21),
+                    ),
                   ),
-                ),
-                SizedBox(height: 18),
-                Text(
-                  'An American expat tries to sell off his highly profitable marijuana '
-                  'empire in London, triggering plots, schemes, bribery and blackmail in '
-                  'an attempt to steal his domain out from under him.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    height: 1.7,
-                    color: Color(0xFF4C505C),
+                  SizedBox(height: 18),
+                  Expanded(
+                    child: Text(
+                      'An American expat tries to sell off his highly profitable marijuana '
+                      'empire in London, triggering plots, schemes, bribery and blackmail in '
+                      'an attempt to steal his domain out from under him.',
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.7,
+                        color: Color(0xFF4C505C),
+                      ),
+                    ),
                   ),
-                ),
-                SizedBox(height: 30),
-                _WatchNowButton(),
-                SizedBox(height: 34),
-                Wrap(
-                  spacing: 14,
-                  runSpacing: 12,
-                  children: [
-                    _TagChip(label: '액션'),
-                    _TagChip(label: '코미디'),
-                    _TagChip(label: '영국'),
-                  ],
-                ),
-              ],
+                  SizedBox(height: 26),
+                  _WatchNowButton(),
+                  SizedBox(height: 26),
+                  Wrap(
+                    spacing: 14,
+                    runSpacing: 12,
+                    children: [
+                      _TagChip(label: '액션'),
+                      _TagChip(label: '코미디'),
+                      _TagChip(label: '영국'),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -416,6 +426,7 @@ class _VolumeControllerBar extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             _circleButton(
               icon: Icons.remove_rounded,
@@ -431,7 +442,7 @@ class _VolumeControllerBar extends StatelessWidget {
               icon: Icons.add_rounded,
               onTap: loading ? null : () => onVolumeChange(true),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 18),
             Text(
               muted ? '음소거됨' : '볼륨 $volume',
               style: const TextStyle(
@@ -726,11 +737,10 @@ class _AppDock extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           for (final _DockItem item in _items) _DockIcon(item: item),
-          const _FriendBubble(),
         ],
       ),
     );
@@ -784,51 +794,6 @@ class _DockIcon extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _FriendBubble extends StatelessWidget {
-  const _FriendBubble();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        _avatarCircle(label: 'Z', color: const Color(0xFF3E92FF)),
-        Positioned(
-          left: -28,
-          child: _avatarCircle(label: '정', color: const Color(0xFF1E66FF)),
-        ),
-      ],
-    );
-  }
-
-  Widget _avatarCircle({required String label, required Color color}) {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: 16,
-        ),
-      ),
     );
   }
 }
